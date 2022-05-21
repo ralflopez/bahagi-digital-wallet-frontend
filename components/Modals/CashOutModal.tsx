@@ -85,8 +85,8 @@ export const CashOutModal = ({ open, toggle }: Props) => {
       if (data) {
         toast({
           title: "Cash Out",
-          description: "Succesful Cash out",
-          status: "success",
+          description: "Cash out order placed. It will be processed soon",
+          status: "info",
           duration: 4000,
           isClosable: true,
         })
