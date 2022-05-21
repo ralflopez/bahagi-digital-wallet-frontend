@@ -33,6 +33,7 @@ const Home: NextPage = () => {
       >
         <Flex direction='column' alignItems='center'>
           <Total total={total} />
+          <MainActions toggleCashInModal={toggleCashInModal} />
         </Flex>
       </Flex>
     </>
