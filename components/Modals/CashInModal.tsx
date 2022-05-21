@@ -12,11 +12,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
   useToast,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
-import React from "react"
+import React, { useContext } from "react"
 import { serializeError } from "serialize-error"
 import {
   CashInDocument,
@@ -31,6 +30,7 @@ import {
   UpdateCashInStatusMutationVariables,
 } from "../../graphql/generated/graphql"
 import { paymongo } from "../../lib/paymongo"
+import { HomeContext } from "../../pages"
 
 interface Props {
   open: boolean
@@ -76,6 +76,7 @@ const validate = (values: any) => {
 }
 
 export const CashInModal = ({ open, toggle }: Props) => {
+  const homeContext = useContext(HomeContext)
   const toast = useToast()
 
   const [createPaymentIntent, { loading, error, data }] = useMutation<
@@ -232,6 +233,7 @@ export const CashInModal = ({ open, toggle }: Props) => {
       }
 
       formik.resetForm()
+      homeContext.refresh()
     },
   })
 
