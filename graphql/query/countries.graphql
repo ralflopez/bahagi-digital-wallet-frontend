@@ -1,0 +1,12 @@
+query Countries {
+  countries {
+    id
+    name
+    mobileCode
+    currency {
+      id
+      name
+      symbol
+    }
+  }
+}
