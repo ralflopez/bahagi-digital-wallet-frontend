@@ -23,7 +23,7 @@ import {
   SignUpMutationVariables,
 } from "../../graphql/generated/graphql"
 import { useRouter } from "next/router"
-import { GetServerSideProps } from "next"
+import { GetServerSideProps, GetServerSidePropsContext } from "next"
 import { withUser } from "../../helpers/hof/withUser"
 
 const validateEmail = (email: string) => {
@@ -234,7 +234,10 @@ const Signup = () => {
 export default Signup
 
 export const getServerSideProps: GetServerSideProps = withUser(
-  async (myUser: MyUserQuery["myUser"] | null) => {
+  async (
+    _: GetServerSidePropsContext,
+    myUser: MyUserQuery["myUser"] | null
+  ) => {
     return myUser
       ? { props: {}, redirect: { destination: "/" } }
       : { props: { user: myUser } }

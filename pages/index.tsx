@@ -97,10 +97,17 @@ export const getServerSideProps: GetServerSideProps = withUser(
     _: GetServerSidePropsContext,
     myUser: MyUserQuery["myUser"] | null
   ) => {
-    return {
-      props: {
-        currency: myUser?.country.currency,
-      } as Props,
-    }
+    return myUser
+      ? {
+          props: {
+            currency: myUser?.country.currency,
+          } as Props,
+        }
+      : {
+          props: {},
+          redirect: {
+            destination: "/auth/login",
+          },
+        }
   }
 )
