@@ -1,0 +1,17 @@
+query MyUser {
+  myUser {
+    id
+    name
+    email
+    role
+    country {
+      id
+      name
+      currency {
+        id
+        name
+        symbol
+      }
+    }
+  }
+}
