@@ -9,9 +9,13 @@ import React from "react"
 
 interface Props {
   toggleCashInModal: () => void
+  toggleCashOutModal: () => void
 }
 
-export const MainActions = ({ toggleCashInModal }: Props) => {
+export const MainActions = ({
+  toggleCashInModal,
+  toggleCashOutModal,
+}: Props) => {
   return (
     <Stack
       direction={{
@@ -22,7 +26,7 @@ export const MainActions = ({ toggleCashInModal }: Props) => {
       <Button colorScheme='green' onClick={toggleCashInModal}>
         <ArrowRightIcon mr='3' /> Cash In
       </Button>
-      <Button colorScheme='green'>
+      <Button colorScheme='green' onClick={toggleCashOutModal}>
         <ArrowLeftIcon mr='3' /> Cash Out
       </Button>
       <Button colorScheme='green'>

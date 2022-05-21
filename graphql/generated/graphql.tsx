@@ -583,6 +583,13 @@ export type CashInMutationVariables = Exact<{
 
 export type CashInMutation = { __typename?: 'Mutation', cashIn: { __typename?: 'ExternalFundTransfer', id: string } };
 
+export type CashOutMutationVariables = Exact<{
+  cashOutInput: CashOutInput;
+}>;
+
+
+export type CashOutMutation = { __typename?: 'Mutation', cashOut: { __typename?: 'ExternalFundTransfer', id: string, details: { __typename?: 'FundTransfer', amount: number } } };
+
 export type CountriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -660,6 +667,42 @@ export function useCashInMutation(baseOptions?: Apollo.MutationHookOptions<CashI
 export type CashInMutationHookResult = ReturnType<typeof useCashInMutation>;
 export type CashInMutationResult = Apollo.MutationResult<CashInMutation>;
 export type CashInMutationOptions = Apollo.BaseMutationOptions<CashInMutation, CashInMutationVariables>;
+export const CashOutDocument = gql`
+    mutation CashOut($cashOutInput: CashOutInput!) {
+  cashOut(cashOutInput: $cashOutInput) {
+    id
+    details {
+      amount
+    }
+  }
+}
+    `;
+export type CashOutMutationFn = Apollo.MutationFunction<CashOutMutation, CashOutMutationVariables>;
+
+/**
+ * __useCashOutMutation__
+ *
+ * To run a mutation, you first call `useCashOutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCashOutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cashOutMutation, { data, loading, error }] = useCashOutMutation({
+ *   variables: {
+ *      cashOutInput: // value for 'cashOutInput'
+ *   },
+ * });
+ */
+export function useCashOutMutation(baseOptions?: Apollo.MutationHookOptions<CashOutMutation, CashOutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CashOutMutation, CashOutMutationVariables>(CashOutDocument, options);
+      }
+export type CashOutMutationHookResult = ReturnType<typeof useCashOutMutation>;
+export type CashOutMutationResult = Apollo.MutationResult<CashOutMutation>;
+export type CashOutMutationOptions = Apollo.BaseMutationOptions<CashOutMutation, CashOutMutationVariables>;
 export const CountriesDocument = gql`
     query Countries {
   countries {

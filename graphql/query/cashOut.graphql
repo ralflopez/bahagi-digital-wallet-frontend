@@ -1,0 +1,8 @@
+mutation CashOut($cashOutInput: CashOutInput!) {
+  cashOut(cashOutInput: $cashOutInput) {
+    id
+    details {
+      amount
+    }
+  }
+}
