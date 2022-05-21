@@ -1,0 +1,8 @@
+mutation LogIn($logIninput: LogInInput!) {
+  logIn(logIninput: $logIninput) {
+    id
+    email
+    name
+    role
+  }
+}
