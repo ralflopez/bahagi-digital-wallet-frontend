@@ -1,56 +1,63 @@
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Stack,
-  Text,
-  useQuery,
-} from "@chakra-ui/react"
+import { Flex } from "@chakra-ui/react"
 import type {
   GetServerSideProps,
   GetServerSidePropsContext,
   NextPage,
 } from "next"
-import Head from "next/head"
-import Image from "next/image"
-import styles from "../styles/Home.module.css"
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@chakra-ui/icons"
-import { useState } from "react"
-import { CashInModal } from "../components/Modals"
+import { createContext, useEffect, useState } from "react"
+import { CashInModal, CashOutModal } from "../components/Modals"
 import { MainActions } from "../components/MainActions"
 import { Total } from "../components/Summary/Total"
 import {
   Currency,
-  MyUserDocument,
   MyUserQuery,
-  MyUserQueryResult,
   TotalBalanceDocument,
   TotalBalanceQuery,
 } from "../graphql/generated/graphql"
 import { withUser } from "../helpers/hof/withUser"
-import { clientSSR } from "../graphql/client"
+import { useLazyQuery } from "@apollo/client"
 
 interface Props {
   currency: Currency
   initTotal: number
 }
 
+interface IHomeContext {
+  currency: Currency
+  refresh: () => void
+}
+
+export const HomeContext = createContext<IHomeContext>({
+  currency: { id: "", name: "", symbol: "" },
+  refresh: () => {},
+})
+
 const Home: NextPage<Props> = ({ currency, initTotal }) => {
-  const [total, setTotal] = useState(initTotal)
+  const [getTotalBalance, { data: balanceData }] =
+    useLazyQuery<TotalBalanceQuery>(TotalBalanceDocument, {
+      fetchPolicy: "network-only",
+    })
   const [cashInModal, setCashInModal] = useState(false)
+
+  useEffect(() => {
+    getTotalBalance()
+  }, [getTotalBalance])
 
   const toggleCashInModal = () => {
     setCashInModal((s) => !s)
   }
 
+  const refresh = () => {
+    getTotalBalance()
+  }
+
   return (
-    <>
+    <HomeContext.Provider
+      value={{
+        currency,
+        refresh,
+      }}
+    >
       <CashInModal open={cashInModal} toggle={toggleCashInModal} />
       <Flex
         bg='gray.100'
@@ -59,11 +66,15 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
         alignItems='center'
       >
         <Flex direction='column' alignItems='center'>
-          <Total total={`${currency.symbol || ""}${total}`} />
+          <Total
+            total={`${currency.symbol || ""}${
+              balanceData?.totalBalance || "0.00"
+            }`}
+          />
           <MainActions toggleCashInModal={toggleCashInModal} />
         </Flex>
       </Flex>
-    </>
+    </HomeContext.Provider>
   )
 }
 
@@ -71,17 +82,12 @@ export default Home
 
 export const getServerSideProps: GetServerSideProps = withUser(
   async (
-    context: GetServerSidePropsContext,
+    _: GetServerSidePropsContext,
     myUser: MyUserQuery["myUser"] | null
   ) => {
-    const client = clientSSR(context)
-    const { data } = await client.query<TotalBalanceQuery>({
-      query: TotalBalanceDocument,
-    })
     return {
       props: {
         currency: myUser?.country.currency,
-        initTotal: data.totalBalance || 0,
       } as Props,
     }
   }
