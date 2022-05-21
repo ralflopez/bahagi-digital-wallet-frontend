@@ -600,6 +600,11 @@ export type SignUpMutationVariables = Exact<{
 
 export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: 'User', id: string, name: string, email: string, role: Role } };
 
+export type TotalBalanceQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TotalBalanceQuery = { __typename?: 'Query', totalBalance: number };
+
 
 export const CountriesDocument = gql`
     query Countries {
@@ -760,3 +765,35 @@ export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignU
 export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
 export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
 export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
+export const TotalBalanceDocument = gql`
+    query TotalBalance {
+  totalBalance
+}
+    `;
+
+/**
+ * __useTotalBalanceQuery__
+ *
+ * To run a query within a React component, call `useTotalBalanceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTotalBalanceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTotalBalanceQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useTotalBalanceQuery(baseOptions?: Apollo.QueryHookOptions<TotalBalanceQuery, TotalBalanceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TotalBalanceQuery, TotalBalanceQueryVariables>(TotalBalanceDocument, options);
+      }
+export function useTotalBalanceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TotalBalanceQuery, TotalBalanceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TotalBalanceQuery, TotalBalanceQueryVariables>(TotalBalanceDocument, options);
+        }
+export type TotalBalanceQueryHookResult = ReturnType<typeof useTotalBalanceQuery>;
+export type TotalBalanceLazyQueryHookResult = ReturnType<typeof useTotalBalanceLazyQuery>;
+export type TotalBalanceQueryResult = Apollo.QueryResult<TotalBalanceQuery, TotalBalanceQueryVariables>;

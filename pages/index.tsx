@@ -26,14 +26,23 @@ import { CashInModal } from "../components/Modals"
 import { MainActions } from "../components/MainActions"
 import { Total } from "../components/Summary/Total"
 import {
+  Currency,
   MyUserDocument,
   MyUserQuery,
   MyUserQueryResult,
+  TotalBalanceDocument,
+  TotalBalanceQuery,
 } from "../graphql/generated/graphql"
 import { withUser } from "../helpers/hof/withUser"
+import { clientSSR } from "../graphql/client"
 
-const Home: NextPage = () => {
-  const [total, setTotal] = useState("P20.00")
+interface Props {
+  currency: Currency
+  initTotal: number
+}
+
+const Home: NextPage<Props> = ({ currency, initTotal }) => {
+  const [total, setTotal] = useState(initTotal)
   const [cashInModal, setCashInModal] = useState(false)
 
   const toggleCashInModal = () => {
@@ -50,7 +59,7 @@ const Home: NextPage = () => {
         alignItems='center'
       >
         <Flex direction='column' alignItems='center'>
-          <Total total={total} />
+          <Total total={`${currency.symbol || ""}${total}`} />
           <MainActions toggleCashInModal={toggleCashInModal} />
         </Flex>
       </Flex>
@@ -61,10 +70,19 @@ const Home: NextPage = () => {
 export default Home
 
 export const getServerSideProps: GetServerSideProps = withUser(
-  async (myUser: MyUserQuery["myUser"] | null) => {
-    console.log(myUser)
+  async (
+    context: GetServerSidePropsContext,
+    myUser: MyUserQuery["myUser"] | null
+  ) => {
+    const client = clientSSR(context)
+    const { data } = await client.query<TotalBalanceQuery>({
+      query: TotalBalanceDocument,
+    })
     return {
-      props: {},
+      props: {
+        currency: myUser?.country.currency,
+        initTotal: data.totalBalance || 0,
+      } as Props,
     }
   }
 )
