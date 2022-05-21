@@ -9,9 +9,9 @@ export const withUser = (callback: Function) => {
       const { data } = await client.query<MyUserQuery>({
         query: MyUserDocument,
       })
-      return callback(data.myUser)
+      return callback(context, data.myUser)
     } catch (e) {
-      return callback(null)
+      return callback(context, null)
     }
   }
 }
