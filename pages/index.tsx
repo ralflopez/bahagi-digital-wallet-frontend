@@ -25,11 +25,13 @@ interface Props {
 interface IHomeContext {
   currency: Currency
   refresh: () => void
+  totalBalance: number
 }
 
 export const HomeContext = createContext<IHomeContext>({
   currency: { id: "", name: "", symbol: "" },
   refresh: () => {},
+  totalBalance: 0,
 })
 
 const Home: NextPage<Props> = ({ currency, initTotal }) => {
@@ -38,6 +40,7 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
       fetchPolicy: "network-only",
     })
   const [cashInModal, setCashInModal] = useState(false)
+  const [cashOutModal, setCashOutModal] = useState(false)
 
   useEffect(() => {
     getTotalBalance()
@@ -45,6 +48,10 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
 
   const toggleCashInModal = () => {
     setCashInModal((s) => !s)
+  }
+
+  const toggleCashOutModal = () => {
+    setCashOutModal((s) => !s)
   }
 
   const refresh = () => {
@@ -56,9 +63,11 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
       value={{
         currency,
         refresh,
+        totalBalance: balanceData?.totalBalance || 0,
       }}
     >
       <CashInModal open={cashInModal} toggle={toggleCashInModal} />
+      <CashOutModal open={cashOutModal} toggle={toggleCashOutModal} />
       <Flex
         bg='gray.100'
         height='100vh'
@@ -71,7 +80,10 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
               balanceData?.totalBalance || "0.00"
             }`}
           />
-          <MainActions toggleCashInModal={toggleCashInModal} />
+          <MainActions
+            toggleCashInModal={toggleCashInModal}
+            toggleCashOutModal={toggleCashOutModal}
+          />
         </Flex>
       </Flex>
     </HomeContext.Provider>
