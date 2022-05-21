@@ -70,8 +70,11 @@ const validate = (values: any) => {
 
   if (values.amount < 1) {
     errors.amount = "Must be greater than 0"
+  } else if (values.amount < 100) {
+    errors.amount = "Must be at least 100"
+  } else if (values.amount >= 100000) {
+    errors.amount = "Must be less than or equal to 100,000"
   }
-
   return errors
 }
 
