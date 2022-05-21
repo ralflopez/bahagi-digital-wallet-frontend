@@ -1,0 +1,12 @@
+mutation UpdateCashInStatus(
+  $updateExternalFundTransferStatusInput: UpdateExternalFundTransferStatusInput!
+) {
+  updateCashInStatus(
+    updateExternalFundTransferStatusInput: $updateExternalFundTransferStatusInput
+  ) {
+    details {
+      status
+    }
+    id
+  }
+}

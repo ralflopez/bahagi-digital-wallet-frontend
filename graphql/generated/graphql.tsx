@@ -576,10 +576,24 @@ export type User = {
   role: Role;
 };
 
+export type CashInMutationVariables = Exact<{
+  cashInInput: CashInInput;
+}>;
+
+
+export type CashInMutation = { __typename?: 'Mutation', cashIn: { __typename?: 'ExternalFundTransfer', id: string } };
+
 export type CountriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type CountriesQuery = { __typename?: 'Query', countries: Array<{ __typename?: 'Country', id: string, name: string, mobileCode: string, currency: { __typename?: 'Currency', id: string, name: string, symbol: string } }> };
+
+export type CreatePaymongoPaymentIntentMutationVariables = Exact<{
+  paymentIntentInput: PaymentIntentInput;
+}>;
+
+
+export type CreatePaymongoPaymentIntentMutation = { __typename?: 'Mutation', createPaymongoPaymentIntent: { __typename?: 'PaymentIntentResult', clientKey: string } };
 
 export type LogInMutationVariables = Exact<{
   logIninput: LogInInput;
@@ -605,7 +619,47 @@ export type TotalBalanceQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type TotalBalanceQuery = { __typename?: 'Query', totalBalance: number };
 
+export type UpdateCashInStatusMutationVariables = Exact<{
+  updateExternalFundTransferStatusInput: UpdateExternalFundTransferStatusInput;
+}>;
 
+
+export type UpdateCashInStatusMutation = { __typename?: 'Mutation', updateCashInStatus: { __typename?: 'ExternalFundTransfer', id: string, details: { __typename?: 'FundTransfer', status: FundTransferStatus } } };
+
+
+export const CashInDocument = gql`
+    mutation CashIn($cashInInput: CashInInput!) {
+  cashIn(cashInInput: $cashInInput) {
+    id
+  }
+}
+    `;
+export type CashInMutationFn = Apollo.MutationFunction<CashInMutation, CashInMutationVariables>;
+
+/**
+ * __useCashInMutation__
+ *
+ * To run a mutation, you first call `useCashInMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCashInMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cashInMutation, { data, loading, error }] = useCashInMutation({
+ *   variables: {
+ *      cashInInput: // value for 'cashInInput'
+ *   },
+ * });
+ */
+export function useCashInMutation(baseOptions?: Apollo.MutationHookOptions<CashInMutation, CashInMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CashInMutation, CashInMutationVariables>(CashInDocument, options);
+      }
+export type CashInMutationHookResult = ReturnType<typeof useCashInMutation>;
+export type CashInMutationResult = Apollo.MutationResult<CashInMutation>;
+export type CashInMutationOptions = Apollo.BaseMutationOptions<CashInMutation, CashInMutationVariables>;
 export const CountriesDocument = gql`
     query Countries {
   countries {
@@ -647,6 +701,39 @@ export function useCountriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type CountriesQueryHookResult = ReturnType<typeof useCountriesQuery>;
 export type CountriesLazyQueryHookResult = ReturnType<typeof useCountriesLazyQuery>;
 export type CountriesQueryResult = Apollo.QueryResult<CountriesQuery, CountriesQueryVariables>;
+export const CreatePaymongoPaymentIntentDocument = gql`
+    mutation CreatePaymongoPaymentIntent($paymentIntentInput: PaymentIntentInput!) {
+  createPaymongoPaymentIntent(paymentIntentInput: $paymentIntentInput) {
+    clientKey
+  }
+}
+    `;
+export type CreatePaymongoPaymentIntentMutationFn = Apollo.MutationFunction<CreatePaymongoPaymentIntentMutation, CreatePaymongoPaymentIntentMutationVariables>;
+
+/**
+ * __useCreatePaymongoPaymentIntentMutation__
+ *
+ * To run a mutation, you first call `useCreatePaymongoPaymentIntentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePaymongoPaymentIntentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPaymongoPaymentIntentMutation, { data, loading, error }] = useCreatePaymongoPaymentIntentMutation({
+ *   variables: {
+ *      paymentIntentInput: // value for 'paymentIntentInput'
+ *   },
+ * });
+ */
+export function useCreatePaymongoPaymentIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreatePaymongoPaymentIntentMutation, CreatePaymongoPaymentIntentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePaymongoPaymentIntentMutation, CreatePaymongoPaymentIntentMutationVariables>(CreatePaymongoPaymentIntentDocument, options);
+      }
+export type CreatePaymongoPaymentIntentMutationHookResult = ReturnType<typeof useCreatePaymongoPaymentIntentMutation>;
+export type CreatePaymongoPaymentIntentMutationResult = Apollo.MutationResult<CreatePaymongoPaymentIntentMutation>;
+export type CreatePaymongoPaymentIntentMutationOptions = Apollo.BaseMutationOptions<CreatePaymongoPaymentIntentMutation, CreatePaymongoPaymentIntentMutationVariables>;
 export const LogInDocument = gql`
     mutation LogIn($logIninput: LogInInput!) {
   logIn(logIninput: $logIninput) {
@@ -797,3 +884,41 @@ export function useTotalBalanceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type TotalBalanceQueryHookResult = ReturnType<typeof useTotalBalanceQuery>;
 export type TotalBalanceLazyQueryHookResult = ReturnType<typeof useTotalBalanceLazyQuery>;
 export type TotalBalanceQueryResult = Apollo.QueryResult<TotalBalanceQuery, TotalBalanceQueryVariables>;
+export const UpdateCashInStatusDocument = gql`
+    mutation UpdateCashInStatus($updateExternalFundTransferStatusInput: UpdateExternalFundTransferStatusInput!) {
+  updateCashInStatus(
+    updateExternalFundTransferStatusInput: $updateExternalFundTransferStatusInput
+  ) {
+    details {
+      status
+    }
+    id
+  }
+}
+    `;
+export type UpdateCashInStatusMutationFn = Apollo.MutationFunction<UpdateCashInStatusMutation, UpdateCashInStatusMutationVariables>;
+
+/**
+ * __useUpdateCashInStatusMutation__
+ *
+ * To run a mutation, you first call `useUpdateCashInStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCashInStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCashInStatusMutation, { data, loading, error }] = useUpdateCashInStatusMutation({
+ *   variables: {
+ *      updateExternalFundTransferStatusInput: // value for 'updateExternalFundTransferStatusInput'
+ *   },
+ * });
+ */
+export function useUpdateCashInStatusMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCashInStatusMutation, UpdateCashInStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCashInStatusMutation, UpdateCashInStatusMutationVariables>(UpdateCashInStatusDocument, options);
+      }
+export type UpdateCashInStatusMutationHookResult = ReturnType<typeof useUpdateCashInStatusMutation>;
+export type UpdateCashInStatusMutationResult = Apollo.MutationResult<UpdateCashInStatusMutation>;
+export type UpdateCashInStatusMutationOptions = Apollo.BaseMutationOptions<UpdateCashInStatusMutation, UpdateCashInStatusMutationVariables>;

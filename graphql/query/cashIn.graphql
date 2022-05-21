@@ -1,0 +1,5 @@
+mutation CashIn($cashInInput: CashInInput!) {
+  cashIn(cashInInput: $cashInInput) {
+    id
+  }
+}

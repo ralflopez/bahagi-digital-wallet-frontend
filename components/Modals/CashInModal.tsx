@@ -1,3 +1,4 @@
+import { useMutation } from "@apollo/client"
 import {
   Button,
   FormControl,
@@ -12,9 +13,24 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  useToast,
 } from "@chakra-ui/react"
 import { useFormik } from "formik"
 import React from "react"
+import { serializeError } from "serialize-error"
+import {
+  CashInDocument,
+  CashInMutation,
+  CashInMutationVariables,
+  CreatePaymongoPaymentIntentDocument,
+  CreatePaymongoPaymentIntentMutation,
+  CreatePaymongoPaymentIntentMutationVariables,
+  FundTransferStatus,
+  UpdateCashInStatusDocument,
+  UpdateCashInStatusMutation,
+  UpdateCashInStatusMutationVariables,
+} from "../../graphql/generated/graphql"
+import { paymongo } from "../../lib/paymongo"
 
 interface Props {
   open: boolean
@@ -60,18 +76,162 @@ const validate = (values: any) => {
 }
 
 export const CashInModal = ({ open, toggle }: Props) => {
+  const toast = useToast()
+
+  const [createPaymentIntent, { loading, error, data }] = useMutation<
+    CreatePaymongoPaymentIntentMutation,
+    CreatePaymongoPaymentIntentMutationVariables
+  >(CreatePaymongoPaymentIntentDocument)
+  const [udpateCashInStatus] = useMutation<
+    UpdateCashInStatusMutation,
+    UpdateCashInStatusMutationVariables
+  >(UpdateCashInStatusDocument)
+  const [cashIn] = useMutation<CashInMutation, CashInMutationVariables>(
+    CashInDocument
+  )
+
   const formik = useFormik({
     initialValues: {
-      cc: "",
-      expMonth: "",
-      expYear: "",
-      cvc: "",
+      cc: "5455590000000009",
+      expMonth: "05",
+      expYear: "25",
+      cvc: "123",
       amount: 0,
     },
     validateOnMount: false,
     validate,
-    onSubmit: (values) => {
-      console.log(values)
+    onSubmit: async ({ amount, cc, cvc, expMonth, expYear }) => {
+      try {
+        // create payment intent
+        const { data } = await createPaymentIntent({
+          variables: {
+            paymentIntentInput: {
+              amount: Number(amount),
+            },
+          },
+        })
+        if (!data) {
+          toast({
+            title: "Paymongo Error",
+            description: "Failed to request payment",
+            status: "error",
+            duration: 4000,
+            isClosable: true,
+          })
+          return
+        }
+
+        const clientKey = data.createPaymongoPaymentIntent.clientKey
+        const paymentIntentId = clientKey.split("_client")[0]
+
+        // make payment method
+        const paymentMethodResult = await paymongo.paymentMethods.create({
+          data: {
+            attributes: {
+              type: "card",
+              details: {
+                card_number: cc,
+                exp_month: Number(expMonth),
+                exp_year: Number(expYear),
+                cvc: cvc,
+              },
+            },
+          },
+        })
+        const paymentMethodId = paymentMethodResult.data.id
+
+        const cashInResult = await cashIn({
+          variables: {
+            cashInInput: {
+              amount: Number(amount),
+              currencyId: "PHP",
+              paymentIntentId: paymentIntentId,
+              paymentServiceId: "paymongo-paymongo-debit-credit",
+            },
+          },
+        })
+        if (!cashInResult.data) {
+          toast({
+            title: "Service Error",
+            description: "Failed to request payment",
+            status: "error",
+            duration: 4000,
+            isClosable: true,
+          })
+          return
+        }
+        const cashInId = cashInResult.data.cashIn.id
+
+        // attach payment intent
+        const response = await paymongo.paymentIntents.attach(paymentIntentId, {
+          data: {
+            attributes: {
+              client_key: clientKey,
+              payment_method: paymentMethodId,
+            },
+          },
+        })
+
+        var paymentIntent = response.data
+        var paymentIntentStatus = paymentIntent.attributes.status
+
+        if (paymentIntentStatus === "awaiting_next_action") {
+          // Render your modal for 3D Secure Authentication since next_action has a value. You can access the next action via paymentIntent.attributes.next_action.
+          toast({
+            title: "Paymongo",
+            description: "Awaiting next action",
+            status: "loading",
+            duration: 4000,
+            isClosable: true,
+          })
+        } else if (paymentIntentStatus === "succeeded") {
+          // You already received your customer's payment. You can show a success message from this condition.
+          await udpateCashInStatus({
+            variables: {
+              updateExternalFundTransferStatusInput: {
+                id: cashInId,
+                status: FundTransferStatus.Success,
+              },
+            },
+          })
+          toast({
+            title: "Cash In Success",
+            description: "Successful cash in",
+            status: "success",
+            duration: 4000,
+            isClosable: true,
+          })
+        } else if (paymentIntentStatus === "awaiting_payment_method") {
+          // The PaymentIntent encountered a processing error. You can refer to paymentIntent.attributes.last_payment_error to check the error and render the appropriate error message.
+          toast({
+            title: "Paymongo",
+            description: "Awaiting payment method",
+            status: "loading",
+            duration: 4000,
+            isClosable: true,
+          })
+        } else if (paymentIntentStatus === "processing") {
+          // You need to requery the PaymentIntent after a second or two. This is a transitory status and should resolve to `succeeded` or `awaiting_payment_method` quickly.
+          toast({
+            title: "Paymongo",
+            description: "Processing",
+            status: "loading",
+            duration: 4000,
+            isClosable: true,
+          })
+        }
+      } catch (e: any) {
+        toast({
+          title: "Cash in failed",
+          description: serializeError(e.message),
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        })
+        console.error(e)
+      }
+
+      formik.resetForm()
     },
   })
 
