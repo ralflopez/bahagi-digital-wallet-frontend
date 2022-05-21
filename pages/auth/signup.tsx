@@ -17,11 +17,14 @@ import {
 import React, { useState } from "react"
 import { useMutation } from "@apollo/client"
 import {
+  MyUserQuery,
   SignUpDocument,
   SignUpMutation,
   SignUpMutationVariables,
 } from "../../graphql/generated/graphql"
 import { useRouter } from "next/router"
+import { GetServerSideProps } from "next"
+import { withUser } from "../../helpers/hof/withUser"
 
 const validateEmail = (email: string) => {
   return email
@@ -229,3 +232,11 @@ const Signup = () => {
 }
 
 export default Signup
+
+export const getServerSideProps: GetServerSideProps = withUser(
+  async (myUser: MyUserQuery["myUser"] | null) => {
+    return myUser
+      ? { props: {}, redirect: { destination: "/" } }
+      : { props: { user: myUser } }
+  }
+)
