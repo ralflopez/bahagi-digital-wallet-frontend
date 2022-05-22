@@ -30,7 +30,7 @@ import {
   UpdateCashInStatusMutationVariables,
 } from "../../graphql/generated/graphql"
 import { paymongo } from "../../lib/paymongo"
-import { HomeContext } from "../../pages"
+import { HomeContext } from "../../pages/wallet"
 
 interface Props {
   open: boolean

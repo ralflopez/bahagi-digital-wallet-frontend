@@ -24,7 +24,7 @@ import {
   UserQuery,
   UserQueryVariables,
 } from "../../graphql/generated/graphql"
-import { HomeContext } from "../../pages"
+import { HomeContext } from "../../pages/wallet"
 
 interface Props {
   open: boolean
