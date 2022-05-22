@@ -25,6 +25,7 @@ import {
 import { useRouter } from "next/router"
 import { GetServerSideProps, GetServerSidePropsContext } from "next"
 import { withUser } from "../../helpers/hof/withUser"
+import { useFormik } from "formik"
 
 const validateEmail = (email: string) => {
   return email
@@ -34,96 +35,75 @@ const validateEmail = (email: string) => {
     )
 }
 
+const validate = (values: any) => {
+  const errors: any = {}
+
+  if (!values.name) {
+    errors.name = "Required"
+  } else if (values.name.length < 2) {
+    errors.name = "Must be at least 2 characters"
+  }
+
+  if (!values.email) {
+    errors.email = "Required"
+  } else if (!validateEmail(values.email)) {
+    errors.email = "Invalid email"
+  }
+
+  if (!values.password) {
+    errors.password = "Required"
+  } else if (values.password.length < 8) {
+    errors.password = "Must be at least 8 characters"
+  }
+
+  if (!values.phoneNumber) {
+    errors.phoneNumber = "Required"
+  } else if (values.phoneNumber.length != 11) {
+    errors.phoneNumber = "Must be 11 digits"
+  }
+
+  if (!values.country) {
+    errors.country = "Required"
+  }
+
+  return errors
+}
+
 const Signup = () => {
   const router = useRouter()
-  const [name, setName] = useState({ value: "", error: "" })
-  const [email, setEmail] = useState({ value: "", error: "" })
-  const [password, setPassword] = useState({ value: "", error: "" })
-  const [country, setCountry] = useState({ value: "", error: "" })
-  const [phoneNumber, setPhoneNumber] = useState({ value: "", error: "" })
-  const [formError, setFormError] = useState("")
 
   const [signup, { loading, error, data }] = useMutation<
     SignUpMutation,
     SignUpMutationVariables
   >(SignUpDocument)
 
-  const handleName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (value.length < 2) {
-      setName({ value, error: "Name must be at least 2 characters" })
-    } else {
-      setName({ value, error: "" })
-    }
-  }
-
-  const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (validateEmail(value)) {
-      setEmail({ value, error: "" })
-    } else {
-      setEmail({ value, error: "Email is invalid" })
-    }
-  }
-
-  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (value.length < 8) {
-      setPassword({ value, error: "Password must be at least 8 characters" })
-    } else {
-      setPassword({ value, error: "" })
-    }
-  }
-
-  const handleCountry = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value
-    if (!value) {
-      setCountry({ value, error: "Please select a country" })
-    } else {
-      setCountry({ value, error: "" })
-    }
-  }
-
-  const handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (value.length < 1 || value.length !== 10) {
-      setPhoneNumber({ value: value, error: "Invalid phone number" })
-    } else {
-      setPhoneNumber({ value: value, error: "" })
-    }
-  }
-
-  const handleSignup = () => {
-    if (name.error || email.error || password.error || country.error) {
-      setFormError("Please fill out all fields")
-      return
-    } else if (
-      name.value.length < 1 ||
-      email.value.length < 1 ||
-      password.value.length < 1 ||
-      country.value.length < 1
-    ) {
-      setFormError("Please fill out all fields")
-      return
-    }
-
-    signup({
-      variables: {
-        signUpInput: {
-          countryId: country.value,
-          email: email.value,
-          password: password.value,
-          name: name.value,
-          phoneNumber: phoneNumber.value,
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+      country: "",
+      phoneNumber: "",
+    },
+    validate,
+    validateOnChange: false,
+    validateOnBlur: false,
+    onSubmit: (values) => {
+      signup({
+        variables: {
+          signUpInput: {
+            countryId: values.country,
+            email: values.country,
+            password: values.password,
+            name: values.name,
+            phoneNumber: values.phoneNumber,
+          },
         },
-      },
-    })
-  }
+      })
+    },
+  })
 
   if (loading) return <div>Loading...</div>
-  if (error) {
-    setFormError(error.message)
-  }
   if (data) {
     router.replace("/")
     return
@@ -139,80 +119,96 @@ const Signup = () => {
         rounded='lg'
         borderColor='gray.300'
       >
-        {formError.length > 0 && (
+        {error && (
           <Alert status='error' mb='4' rounded='lg'>
             <AlertIcon />
-            <AlertDescription>{formError}</AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
         <Text fontSize='xx-large' fontWeight='bold' mb='4'>
           Sign Up
         </Text>
         <Divider mb='4' />
-        <FormControl isRequired mb='4' isInvalid={name.error !== ""}>
+        <FormControl isRequired mb='4' isInvalid={Boolean(formik.errors.name)}>
           <FormLabel htmlFor='name'>Name</FormLabel>
           <Input
             id='name'
-            type='name'
-            value={name.value}
-            onChange={handleName}
-            onBlur={handleName}
+            type='text'
+            name='name'
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
-          {name.error !== "" && (
-            <FormErrorMessage>{name.error}</FormErrorMessage>
+          {formik.errors.name && (
+            <FormErrorMessage>{formik.errors.name}</FormErrorMessage>
           )}
         </FormControl>
-        <FormControl isRequired mb='4' isInvalid={email.error !== ""}>
-          <FormLabel htmlFor='email'>Email address</FormLabel>
+        <FormControl isRequired mb='4' isInvalid={Boolean(formik.errors.email)}>
+          <FormLabel htmlFor='name'>Email</FormLabel>
           <Input
             id='email'
             type='email'
-            value={email.value}
-            onChange={handleEmail}
-            onBlur={handleEmail}
+            name='email'
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
-          {email.error !== "" && (
-            <FormErrorMessage>{email.error}</FormErrorMessage>
+          {formik.errors.email && (
+            <FormErrorMessage>{formik.errors.email}</FormErrorMessage>
           )}
         </FormControl>
-        <FormControl isRequired mb='4' isInvalid={password.error !== ""}>
-          <FormLabel htmlFor='password'>Password</FormLabel>
+        <FormControl
+          isRequired
+          mb='4'
+          isInvalid={Boolean(formik.errors.password)}
+        >
+          <FormLabel htmlFor='name'>Password</FormLabel>
           <Input
             id='password'
             type='password'
-            value={password.value}
-            onChange={handlePassword}
-            onBlur={handlePassword}
+            name='password'
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
-          {password.error !== "" && (
-            <FormErrorMessage>{password.error}</FormErrorMessage>
+          {formik.errors.password && (
+            <FormErrorMessage>{formik.errors.password}</FormErrorMessage>
           )}
         </FormControl>
-        <FormControl isRequired mb='4' isInvalid={country.error !== ""}>
+        <FormControl
+          isRequired
+          mb='4'
+          isInvalid={Boolean(formik.errors.phoneNumber)}
+        >
+          <FormLabel htmlFor='name'>Phone Number</FormLabel>
+          <Input
+            id='phone-number'
+            type='text'
+            name='phoneNumber'
+            value={formik.values.phoneNumber}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+          />
+          {formik.errors.phoneNumber && (
+            <FormErrorMessage>{formik.errors.phoneNumber}</FormErrorMessage>
+          )}
+        </FormControl>
+        <FormControl
+          isRequired
+          mb='4'
+          isInvalid={Boolean(formik.errors.country)}
+        >
           <FormLabel htmlFor='country'>Country</FormLabel>
           <Select
             id='country'
             placeholder='Select country'
-            onChange={handleCountry}
-            onBlur={handleCountry}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           >
             <option value='ph'>Philippines</option>
           </Select>
-          {country.error !== "" && (
-            <FormErrorMessage>{country.error}</FormErrorMessage>
-          )}
-        </FormControl>
-        <FormControl isRequired mb='4' isInvalid={password.error !== ""}>
-          <FormLabel htmlFor='phone-number'>Phone Number</FormLabel>
-          <Input
-            id='phone-number'
-            type='text'
-            value={phoneNumber.value}
-            onChange={handlePhoneNumber}
-            onBlur={handlePhoneNumber}
-          />
-          {phoneNumber.error !== "" && (
-            <FormErrorMessage>{phoneNumber.error}</FormErrorMessage>
+          {formik.errors.country && (
+            <FormErrorMessage>{formik.errors.country}</FormErrorMessage>
           )}
         </FormControl>
         <Link href='/auth/login' color='green.500'>
@@ -222,7 +218,7 @@ const Signup = () => {
           colorScheme='green'
           mt='4'
           display='block'
-          onClick={handleSignup}
+          onClick={formik.handleSubmit as any}
         >
           Sign Up
         </Button>
