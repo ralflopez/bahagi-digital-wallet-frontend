@@ -28,6 +28,7 @@ import {
 import { useRouter } from "next/router"
 import { GetServerSideProps, GetServerSidePropsContext } from "next"
 import { withUser } from "../../helpers/hof/withUser"
+import { useFormik } from "formik"
 
 const validateEmail = (email: string) => {
   return email
@@ -39,56 +40,44 @@ const validateEmail = (email: string) => {
 
 const Login = () => {
   const router = useRouter()
-  const [email, setEmail] = useState({ value: "demo@email.com", error: "" })
-  const [password, setPassword] = useState({ value: "password", error: "" })
-  const [formError, setFormError] = useState("")
 
   const [login, { loading, error, data }] = useMutation<
     LogInMutation,
     LogInMutationVariables
   >(LogInDocument)
 
-  const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (validateEmail(value)) {
-      setEmail({ value, error: "" })
-    } else {
-      setEmail({ value, error: "Email is invalid" })
-    }
-  }
+  const formik = useFormik({
+    initialValues: {
+      email: "demo@email.com",
+      password: "password",
+    },
+    validate: (values) => {
+      const errors: any = {}
+      if (!values.email) {
+        errors.email = "Required"
+      } else if (!validateEmail(values.email)) {
+        errors.email = "Invalid email"
+      }
 
-  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (value.length < 8) {
-      setPassword({ value, error: "Password must be at least 8 characters" })
-    } else {
-      setPassword({ value, error: "" })
-    }
-  }
-
-  const handleLogin = () => {
-    if (email.error || password.error) {
-      setFormError("Please fill out all fields")
-      return
-    } else if (email.value.length < 1 || password.value.length < 1) {
-      setFormError("Please fill out all fields")
-      return
-    }
-
-    login({
-      variables: {
-        logIninput: {
-          email: email.value,
-          password: password.value,
+      if (!values.password) {
+        errors.password = "Required"
+      } else if (values.password.length < 8) {
+        errors.password = "Must be at least 8 characters"
+      }
+    },
+    onSubmit: (values) => {
+      login({
+        variables: {
+          logIninput: {
+            email: values.email,
+            password: values.password,
+          },
         },
-      },
-    })
-  }
+      })
+    },
+  })
 
   if (loading) return <div>Loading...</div>
-  if (error) {
-    setFormError(error.message)
-  }
   if (data) {
     router.replace("/")
     return
@@ -104,40 +93,46 @@ const Login = () => {
         rounded='lg'
         borderColor='gray.300'
       >
-        {formError.length > 0 && (
+        {error && (
           <Alert status='error' mb='4' rounded='lg'>
             <AlertIcon />
-            <AlertDescription>{formError}</AlertDescription>
+            <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
         <Text fontSize='xx-large' fontWeight='bold' mb='4'>
-          Sign Up
+          Log in
         </Text>
         <Divider mb='4' />
-        <FormControl isRequired mb='4' isInvalid={email.error !== ""}>
+        <FormControl isRequired mb='4' isInvalid={Boolean(formik.errors.email)}>
           <FormLabel htmlFor='email'>Email address</FormLabel>
           <Input
             id='email'
             type='email'
-            value={email.value}
-            onChange={handleEmail}
-            onBlur={handleEmail}
+            name='email'
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
-          {email.error !== "" && (
-            <FormErrorMessage>{email.error}</FormErrorMessage>
+          {formik.errors.email !== "" && (
+            <FormErrorMessage>{formik.errors.email}</FormErrorMessage>
           )}
         </FormControl>
-        <FormControl isRequired mb='4' isInvalid={password.error !== ""}>
-          <FormLabel htmlFor='password'>Password</FormLabel>
+        <FormControl
+          isRequired
+          mb='4'
+          isInvalid={Boolean(formik.errors.password)}
+        >
+          <FormLabel htmlFor='email'>Password</FormLabel>
           <Input
             id='password'
             type='password'
-            value={password.value}
-            onChange={handlePassword}
-            onBlur={handlePassword}
+            name='password'
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           />
-          {password.error !== "" && (
-            <FormErrorMessage>{password.error}</FormErrorMessage>
+          {formik.errors.password !== "" && (
+            <FormErrorMessage>{formik.errors.password}</FormErrorMessage>
           )}
         </FormControl>
         <Link href='/auth/signup' color='green.500'>
@@ -147,7 +142,7 @@ const Login = () => {
           colorScheme='green'
           mt='4'
           display='block'
-          onClick={handleLogin}
+          onClick={formik.handleSubmit as any}
         >
           Log in
         </Button>
