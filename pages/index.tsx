@@ -79,7 +79,7 @@ const Home: NextPage<Props> = ({ user }) => {
       <CashOutModal open={cashOutModal} toggle={toggleCashOutModal} />
       <SendMoneyModal open={sendMoneyModal} toggle={toggleSendMoneyModal} />
       <Flex
-        bg='gray.100'
+        bg='green.300'
         height='100vh'
         justifyContent='center'
         alignItems='center'
@@ -87,7 +87,9 @@ const Home: NextPage<Props> = ({ user }) => {
         <Flex direction='column' alignItems='center'>
           <Total
             total={`${currency.symbol || ""}${
-              balanceData?.totalBalance || "0.00"
+              balanceData?.totalBalance
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0.00"
             }`}
           />
           <MainActions

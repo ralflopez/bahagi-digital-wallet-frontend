@@ -34,9 +34,6 @@ export const MainActions = ({
       <Button colorScheme='green' onClick={toggleSendMoneyModal}>
         <ChevronUpIcon mr='3' /> Send Money
       </Button>
-      <Button colorScheme='green'>
-        <ChevronDownIcon mr='3' /> Receive Money
-      </Button>
     </Stack>
   )
 }

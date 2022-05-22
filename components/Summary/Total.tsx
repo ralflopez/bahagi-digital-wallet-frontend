@@ -7,7 +7,7 @@ interface Props {
 
 export const Total = ({ total }: Props) => {
   return (
-    <Text fontSize='xxx-large' mb='8' fontWeight='bold' color='whiteAlpha.300s'>
+    <Text fontSize='xxx-large' mb='8' fontWeight='bold' color='gray.800'>
       {total}
     </Text>
   )
