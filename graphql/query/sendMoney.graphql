@@ -1,0 +1,21 @@
+mutation SendMoney($sendMoneyInput: SendMoneyInput!) {
+  sendMoney(sendMoneyInput: $sendMoneyInput) {
+    id
+    details {
+      amount
+      currency {
+        id
+        name
+        symbol
+      }
+    }
+    receiver {
+      id
+      email
+    }
+    sender {
+      id
+      email
+    }
+  }
+}

@@ -10,11 +10,13 @@ import React from "react"
 interface Props {
   toggleCashInModal: () => void
   toggleCashOutModal: () => void
+  toggleSendMoneyModal: () => void
 }
 
 export const MainActions = ({
   toggleCashInModal,
   toggleCashOutModal,
+  toggleSendMoneyModal,
 }: Props) => {
   return (
     <Stack
@@ -29,7 +31,7 @@ export const MainActions = ({
       <Button colorScheme='green' onClick={toggleCashOutModal}>
         <ArrowLeftIcon mr='3' /> Cash Out
       </Button>
-      <Button colorScheme='green'>
+      <Button colorScheme='green' onClick={toggleSendMoneyModal}>
         <ChevronUpIcon mr='3' /> Send Money
       </Button>
       <Button colorScheme='green'>

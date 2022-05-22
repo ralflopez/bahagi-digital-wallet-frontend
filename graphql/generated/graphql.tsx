@@ -492,7 +492,7 @@ export type Query = {
    *
    * * _Requires authentication_
    *
-   * * Returns a user given an ID.
+   * * Returns a user given an ID / email.
    */
   user: User;
   /**
@@ -614,6 +614,13 @@ export type MyUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MyUserQuery = { __typename?: 'Query', myUser: { __typename?: 'User', id: string, name: string, email: string, role: Role, country: { __typename?: 'Country', id: string, name: string, currency: { __typename?: 'Currency', id: string, name: string, symbol: string } } } };
 
+export type SendMoneyMutationVariables = Exact<{
+  sendMoneyInput: SendMoneyInput;
+}>;
+
+
+export type SendMoneyMutation = { __typename?: 'Mutation', sendMoney: { __typename?: 'InternalFundTransfer', id: string, details: { __typename?: 'FundTransfer', amount: number, currency: { __typename?: 'Currency', id: string, name: string, symbol: string } }, receiver: { __typename?: 'User', id: string, email: string }, sender: { __typename?: 'User', id: string, email: string } } };
+
 export type SignUpMutationVariables = Exact<{
   signUpInput: SignUpInput;
 }>;
@@ -632,6 +639,13 @@ export type UpdateCashInStatusMutationVariables = Exact<{
 
 
 export type UpdateCashInStatusMutation = { __typename?: 'Mutation', updateCashInStatus: { __typename?: 'ExternalFundTransfer', id: string, details: { __typename?: 'FundTransfer', status: FundTransferStatus } } };
+
+export type UserQueryVariables = Exact<{
+  userId: Scalars['String'];
+}>;
+
+
+export type UserQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, email: string, name: string } };
 
 
 export const CashInDocument = gql`
@@ -859,6 +873,55 @@ export function useMyUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyU
 export type MyUserQueryHookResult = ReturnType<typeof useMyUserQuery>;
 export type MyUserLazyQueryHookResult = ReturnType<typeof useMyUserLazyQuery>;
 export type MyUserQueryResult = Apollo.QueryResult<MyUserQuery, MyUserQueryVariables>;
+export const SendMoneyDocument = gql`
+    mutation SendMoney($sendMoneyInput: SendMoneyInput!) {
+  sendMoney(sendMoneyInput: $sendMoneyInput) {
+    id
+    details {
+      amount
+      currency {
+        id
+        name
+        symbol
+      }
+    }
+    receiver {
+      id
+      email
+    }
+    sender {
+      id
+      email
+    }
+  }
+}
+    `;
+export type SendMoneyMutationFn = Apollo.MutationFunction<SendMoneyMutation, SendMoneyMutationVariables>;
+
+/**
+ * __useSendMoneyMutation__
+ *
+ * To run a mutation, you first call `useSendMoneyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSendMoneyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [sendMoneyMutation, { data, loading, error }] = useSendMoneyMutation({
+ *   variables: {
+ *      sendMoneyInput: // value for 'sendMoneyInput'
+ *   },
+ * });
+ */
+export function useSendMoneyMutation(baseOptions?: Apollo.MutationHookOptions<SendMoneyMutation, SendMoneyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SendMoneyMutation, SendMoneyMutationVariables>(SendMoneyDocument, options);
+      }
+export type SendMoneyMutationHookResult = ReturnType<typeof useSendMoneyMutation>;
+export type SendMoneyMutationResult = Apollo.MutationResult<SendMoneyMutation>;
+export type SendMoneyMutationOptions = Apollo.BaseMutationOptions<SendMoneyMutation, SendMoneyMutationVariables>;
 export const SignUpDocument = gql`
     mutation SignUp($signUpInput: SignUpInput!) {
   signUp(signUpInput: $signUpInput) {
@@ -965,3 +1028,40 @@ export function useUpdateCashInStatusMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateCashInStatusMutationHookResult = ReturnType<typeof useUpdateCashInStatusMutation>;
 export type UpdateCashInStatusMutationResult = Apollo.MutationResult<UpdateCashInStatusMutation>;
 export type UpdateCashInStatusMutationOptions = Apollo.BaseMutationOptions<UpdateCashInStatusMutation, UpdateCashInStatusMutationVariables>;
+export const UserDocument = gql`
+    query User($userId: String!) {
+  user(id: $userId) {
+    id
+    email
+    name
+  }
+}
+    `;
+
+/**
+ * __useUserQuery__
+ *
+ * To run a query within a React component, call `useUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useUserQuery(baseOptions: Apollo.QueryHookOptions<UserQuery, UserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserQuery, UserQueryVariables>(UserDocument, options);
+      }
+export function useUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserQuery, UserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserQuery, UserQueryVariables>(UserDocument, options);
+        }
+export type UserQueryHookResult = ReturnType<typeof useUserQuery>;
+export type UserLazyQueryHookResult = ReturnType<typeof useUserLazyQuery>;
+export type UserQueryResult = Apollo.QueryResult<UserQuery, UserQueryVariables>;

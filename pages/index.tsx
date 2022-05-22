@@ -16,31 +16,35 @@ import {
 } from "../graphql/generated/graphql"
 import { withUser } from "../helpers/hof/withUser"
 import { useLazyQuery } from "@apollo/client"
+import { SendMoneyModal } from "../components/Modals/SendMoneyModal"
 
 interface Props {
-  currency: Currency
-  initTotal: number
+  user: MyUserQuery["myUser"]
 }
 
 interface IHomeContext {
+  user: MyUserQuery["myUser"]
   currency: Currency
   refresh: () => void
   totalBalance: number
 }
 
 export const HomeContext = createContext<IHomeContext>({
-  currency: { id: "", name: "", symbol: "" },
+  user: {} as MyUserQuery["myUser"],
+  currency: {} as Currency,
   refresh: () => {},
   totalBalance: 0,
 })
 
-const Home: NextPage<Props> = ({ currency, initTotal }) => {
+const Home: NextPage<Props> = ({ user }) => {
+  const currency = user.country.currency
   const [getTotalBalance, { data: balanceData }] =
     useLazyQuery<TotalBalanceQuery>(TotalBalanceDocument, {
       fetchPolicy: "network-only",
     })
   const [cashInModal, setCashInModal] = useState(false)
   const [cashOutModal, setCashOutModal] = useState(false)
+  const [sendMoneyModal, setSendMoneyModal] = useState(false)
 
   useEffect(() => {
     getTotalBalance()
@@ -54,6 +58,10 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
     setCashOutModal((s) => !s)
   }
 
+  const toggleSendMoneyModal = () => {
+    setSendMoneyModal((s) => !s)
+  }
+
   const refresh = () => {
     getTotalBalance()
   }
@@ -61,6 +69,7 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
   return (
     <HomeContext.Provider
       value={{
+        user,
         currency,
         refresh,
         totalBalance: balanceData?.totalBalance || 0,
@@ -68,6 +77,7 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
     >
       <CashInModal open={cashInModal} toggle={toggleCashInModal} />
       <CashOutModal open={cashOutModal} toggle={toggleCashOutModal} />
+      <SendMoneyModal open={sendMoneyModal} toggle={toggleSendMoneyModal} />
       <Flex
         bg='gray.100'
         height='100vh'
@@ -83,6 +93,7 @@ const Home: NextPage<Props> = ({ currency, initTotal }) => {
           <MainActions
             toggleCashInModal={toggleCashInModal}
             toggleCashOutModal={toggleCashOutModal}
+            toggleSendMoneyModal={toggleSendMoneyModal}
           />
         </Flex>
       </Flex>
@@ -100,7 +111,7 @@ export const getServerSideProps: GetServerSideProps = withUser(
     return myUser
       ? {
           props: {
-            currency: myUser?.country.currency,
+            user: myUser,
           } as Props,
         }
       : {
