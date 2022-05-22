@@ -1,11 +1,11 @@
-import { Box, Flex, Text } from "@chakra-ui/react"
+import { Badge, Box, Flex, Image, Text } from "@chakra-ui/react"
 import type {
   GetServerSideProps,
   GetServerSidePropsContext,
   NextPage,
 } from "next"
 import { createContext, useEffect, useState } from "react"
-import { CashInModal, CashOutModal } from "../components/Modals"
+import { CashInModal, CashOutModal, UserModal } from "../components/Modals"
 import { MainActions } from "../components/MainActions"
 import { Total } from "../components/Summary/Total"
 import {
@@ -45,6 +45,7 @@ const Home: NextPage<Props> = ({ user }) => {
   const [cashInModal, setCashInModal] = useState(false)
   const [cashOutModal, setCashOutModal] = useState(false)
   const [sendMoneyModal, setSendMoneyModal] = useState(false)
+  const [userModal, setUserModal] = useState(false)
 
   useEffect(() => {
     getTotalBalance()
@@ -60,6 +61,10 @@ const Home: NextPage<Props> = ({ user }) => {
 
   const toggleSendMoneyModal = () => {
     setSendMoneyModal((s) => !s)
+  }
+
+  const toggleUserModal = () => {
+    setUserModal((s) => !s)
   }
 
   const refresh = () => {
@@ -78,6 +83,7 @@ const Home: NextPage<Props> = ({ user }) => {
       <CashInModal open={cashInModal} toggle={toggleCashInModal} />
       <CashOutModal open={cashOutModal} toggle={toggleCashOutModal} />
       <SendMoneyModal open={sendMoneyModal} toggle={toggleSendMoneyModal} />
+      <UserModal open={userModal} toggle={toggleUserModal} />
       <Flex
         bg='green.300'
         height='100vh'
@@ -85,9 +91,14 @@ const Home: NextPage<Props> = ({ user }) => {
         alignItems='center'
       >
         <Flex direction='column' alignItems='center'>
-          <Flex>
-            <Text>Hi, {user.name}</Text>
-          </Flex>
+          <Badge
+            colorScheme='green'
+            mb='4'
+            cursor='pointer'
+            onClick={toggleUserModal}
+          >
+            Hi, {user.name}
+          </Badge>
           <Total
             total={`${currency.symbol || ""}${
               balanceData?.totalBalance
