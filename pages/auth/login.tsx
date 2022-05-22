@@ -9,21 +9,17 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Select,
   Text,
   FormErrorMessage,
   Link,
 } from "@chakra-ui/react"
-import React, { useState } from "react"
+import React from "react"
 import { useMutation } from "@apollo/client"
 import {
   LogInDocument,
   LogInMutation,
   LogInMutationVariables,
   MyUserQuery,
-  SignUpDocument,
-  SignUpMutation,
-  SignUpMutationVariables,
 } from "../../graphql/generated/graphql"
 import { useRouter } from "next/router"
 import { GetServerSideProps, GetServerSidePropsContext } from "next"
@@ -65,6 +61,8 @@ const Login = () => {
         errors.password = "Must be at least 8 characters"
       }
     },
+    validateOnBlur: false,
+    validateOnChange: false,
     onSubmit: (values) => {
       login({
         variables: {
