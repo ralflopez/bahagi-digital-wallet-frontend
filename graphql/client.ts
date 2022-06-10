@@ -18,7 +18,7 @@ export const clientSSR = (context: any) => {
 
   return new ApolloClient({
     link: createHttpLink({
-      uri: "http://localhost:4000/graphql",
+      uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
       credentials: "include",
       headers: {
         Cookie: cookie.serialize(KEY, sessionId),
