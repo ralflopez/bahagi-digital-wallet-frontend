@@ -4,7 +4,9 @@ import nookies from "nookies"
 
 export const client = new ApolloClient({
   link: createHttpLink({
-    uri: process.env.GRAPHQL_URL || "http://localhost:4000/graphql",
+    uri:
+      process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT ||
+      "http://localhost:4000/graphql",
     credentials: "include",
   }),
   cache: new InMemoryCache(),
